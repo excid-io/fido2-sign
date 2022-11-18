@@ -53,7 +53,7 @@ function createCredential() {
               document.getElementById('step2').style.display ='block';         
         })
         .catch((error) => {
-            alert('Public key creation failed with error: ', error)
+            alert('Public key creation failed with error: ', error.message)
         })
 }
 
@@ -77,7 +77,7 @@ function getCredential(textToSign) {
             document.getElementById('step3').style.display ='block';
         })
         .catch((error) => {
-            alert('Signature creation failed with error: ', error)
+            alert('Signature creation failed with error: ', error.message)
         })
 }
 
