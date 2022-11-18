@@ -49,7 +49,11 @@ function createCredential() {
                 "jwk",
                 subtleCryptoPublicKey
               );
-              document.getElementById('jwkpubkey').innerHTML =  JSON.stringify(subtleCryptoPublicKeyJWK)         
+              document.getElementById('jwkpubkey').innerHTML =  JSON.stringify(subtleCryptoPublicKeyJWK)
+              document.getElementById('step2').style.display ='block';         
+        })
+        .catch((error) => {
+            alert('Public key creation failed with error: ', error)
         })
 }
 
@@ -65,14 +69,15 @@ function getCredential(textToSign) {
         .then(async (assertedCredential) => {
             // Move data into Arrays incase it is super long
             authenticatorData = new Uint8Array(assertedCredential.response.authenticatorData);
-            clientDataJSON = new TextDecoder().decode(new Uint8Array(assertedCredential.response.clientDataJSON));
+            clientDataJSON = new Uint8Array(assertedCredential.response.clientDataJSON);
             signature = new Uint8Array(assertedCredential.response.signature);
             document.getElementById('authenticatorData').innerHTML =  btoa(String.fromCharCode.apply(null,authenticatorData))
-            document.getElementById('clientDataJSON').innerHTML =  clientDataJSON
+            document.getElementById('clientDataJSON').innerHTML =  new TextDecoder().decode(clientDataJSON)
             document.getElementById('signature').innerHTML =  btoa(String.fromCharCode.apply(null,signature))
+            document.getElementById('step3').style.display ='block';
         })
         .catch((error) => {
-            console.log('FAIL', error)
+            alert('Signature creation failed with error: ', error)
         })
 }
 
@@ -92,20 +97,21 @@ function verify()
 {
     const textToVerify = document.getElementById('textToVerify').value
     crypto.subtle.digest('SHA-256', new TextEncoder().encode(textToVerify)).then((textToVerifyHash) => {
-        const clientDataObj = JSON.parse(clientDataJSON)        
-        clientDataObj.challenge = b64URLenc(String.fromCharCode.apply(null,new Uint8Array(textToVerifyHash)))
-        console.log(clientDataObj)
-        clientData = JSON.stringify(clientDataObj);
-        _verify(clientData).then((result)=>{alert("Signature verification..." + result)});
+        _verify(textToVerifyHash).then((result)=>{alert("Verification output: " + result)});
     });
     
 }
 
 
-async function  _verify(clientData)
+async function  _verify(textToVerify)
 {
-    console.log(clientData)
-    let clientDataJSON_sha256 = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(clientData)));
+    //Step 1 verify clientDataJSON
+    const clientDataObj = JSON.parse(new TextDecoder().decode(clientDataJSON))
+    challenge = b64URLenc(String.fromCharCode.apply(null,new Uint8Array(textToVerify)))
+    if (clientDataObj.challenge != challenge){
+        return "ClientDataJSON validation failed."
+    }
+    let clientDataJSON_sha256 = new Uint8Array(await crypto.subtle.digest('SHA-256', clientDataJSON));
     let signatureBase = new Uint8Array(authenticatorData.length + clientDataJSON_sha256.length);
     signatureBase.set(authenticatorData);
     signatureBase.set(clientDataJSON_sha256, authenticatorData.length);
@@ -126,7 +132,11 @@ async function  _verify(clientData)
         rawSignature,
         signatureBase
       );
-    return result
+    if (result){
+        return "verification succeeded"
+    }else{
+        return "signature validation failed"
+    }
 }
 
 
