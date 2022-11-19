@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>A did:jwt RP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class="container">
+        <div class="row pt-3">
+          <a href="https://www.excid.io"><img src="logo.svg" alt="excid logo" height="60"/></a>
+          <p class="lead">A did:jwt Relaying Party</p>
+          <p>This page is used only for demonstration purposes. </p>
+        </div>
+        <div id="login" style="display:none">
+            <div class="card mt-3">
+                <h5 class="card-header">Login</h5>
+                <div class="card-body">
+                    <h5 class="card-title">Login with your did:jwk DID</h5>
+                    <p class="card-text">Press the Login button to redirect to your wallet.
+                    In this demo the wallet is hardcoded but in reality a discovery
+                    mechanism should be used. 
+                    </p>
+                    <a href="did-jwt-wallet.html?state=thisshouldbearandomnumber" class="btn btn-primary">Login</a>
+                </div>
+            </div>
+        </div>
+        <div id="authn" style="display:none">
+            <div class="card mt-3">
+                <h5 class="card-header">Logged In</h5>
+                <div class="card-body">
+                    <h5 class="card-title">did:jwk DID received</h5>
+                    <b>authenticatorData:</b><br/>  
+                    <code id="authenticatorData"></code><br/>
+                    <b>clientDataJSON:</b><br/>  
+                    <code id="clientDataJSON"></code><br/>
+                    <b>signature:</b><br/>  
+                    <code id="signature"></code><br/>
+                    <b>did:jwk</b><br/>  
+                    <code id="didjwk"></code><br/>
+                    did:jwk (decoded)</b><br/>  
+                    <code id="didjwkdec"></code>
+                </div>
+            </div>
+        </div>
+      </div>
+    <script src="did-jwk.js"></script>
+    <script>
+        let params = (new URL(document.location)).searchParams;
+        let authenticatorDatab64 = params.get("a");
+        let clientDataJSONb64 = params.get("c");
+        let didjwk =params.get("d")
+        let signatureb64 = params.get("s");
+        let state = params.get("state")
+        console.log (state)
+        if (authenticatorDatab64==null){
+            document.getElementById('login').style.display ='block';
+        }else{
+            let clientDataJSON = b64URLdec(clientDataJSONb64)
+            document.getElementById('authn').style.display ='block';
+            document.getElementById('authenticatorData').innerHTML =  authenticatorDatab64
+            document.getElementById('clientDataJSON').innerHTML =  clientDataJSON
+            document.getElementById('signature').innerHTML =  signatureb64
+            document.getElementById('didjwk').innerHTML =  "did:jwk:" + didjwk
+            document.getElementById('didjwkdec').innerHTML =    b64URLdec(didjwk)
+        }
+    </script> 
+  </body>
+</html>
