@@ -45,7 +45,9 @@
                 <p class="card-text">Relaying Party wants to access
                 your DID. Press authorize to generate a proof.</p>
                 <div class="mb-3">
-                    <label for="inputdid" class="form-label">Please paste your DID without the did:jwk part</label>
+                    <label for="inputdid" class="form-label">Please paste your DID without the did:jwk part
+                        (normally this is not required but this demo is memory-less)
+                    </label>
                     <input type="text" class="form-control" id="inputdid">
                 </div>
                 <button onclick="sign()" class="btn btn-primary">Authorize</button> 
