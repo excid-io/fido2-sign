@@ -1,5 +1,4 @@
 
-
 function createCredential() {
     const nickname = document.getElementById('nickname').value
     const randomChallenge = new Uint8Array(16);
@@ -48,7 +47,7 @@ function createCredential() {
                 subtleCryptoPublicKey
               );
               document.getElementById('jwkpubkey').innerHTML =  JSON.stringify(subtleCryptoPublicKeyJWK);
-              document.getElementById('didjwk').innerHTML =  "did:jwk:" + b64URLenc(JSON.stringify(subtleCryptoPublicKeyJWK));
+              document.getElementById('didjwk').innerHTML =  "did:jwk:" + b64urltoa(JSON.stringify(subtleCryptoPublicKeyJWK));
               document.getElementById('output').style.display ='block';         
         })
         .catch((error) => {
@@ -71,26 +70,38 @@ function getCredential(textToSign) {
             authenticatorData = new Uint8Array(assertedCredential.response.authenticatorData);
             clientDataJSON = new Uint8Array(assertedCredential.response.clientDataJSON);
             signature = new Uint8Array(assertedCredential.response.signature);
-            window.location.replace("https://excid-io.github.io/fido2-sign/rp.html?a=" + b64URLenc(authenticatorData) +
-            "&c="+ b64URLenc(new TextDecoder().decode(clientDataJSON))+ "&s=" + b64URLenc(signature) +
-            "&d=" + inputdid + "&state=" + textToSign);
+            window.location.replace("https://excid-io.github.io/fido2-sign/rp.html"
+             + "?a=" + Uint8Tob64url(authenticatorData) 
+             + "&c="+ Uint8Tob64url(clientDataJSON) 
+             + "&s=" + Uint8Tob64url(signature) +
+            + "&d=" + inputdid + "&state=" + textToSign);
         })
         .catch((error) => {
             alert('Signature creation failed with error: ', error.message)
+            console.log("Error", error)
         })
 }
 
-function b64URLenc(buf) {
+function b64urltoa(buf) {
     return btoa(buf)
         .replace(/\+/g, "-")
         .replace(/\//g, "_")
         .replace(/=/g, "");
 }
-function b64URLdec(buf) {
-    return atob(buf
+
+
+function Uint8Tob64url(buf) {
+    return btoa(String.fromCharCode.apply(null,buf))
         .replace(/\+/g, "-")
         .replace(/\//g, "_")
-        .replace(/=/g, ""));
+        .replace(/=/g, "");
+}
+
+function b64urlToUint8(buf) {
+    return encoder.encode(atob(buf
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=/g, "")));
 }
 
 function sign(){
